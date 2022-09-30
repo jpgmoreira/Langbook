@@ -1,0 +1,184 @@
+/* - General - */
+* {
+    outline: none;
+}
+.cursor-pointer {
+    cursor: pointer;
+}
+.cursor-grabbing {
+    cursor: grabbing;
+}
+.absolute-centering {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+textarea.clipboard {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    resize: none;
+    position: fixed;
+    bottom: 200%;
+}
+
+/* - Scrollbar - */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+}
+::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+::-webkit-scrollbar-corner {
+    background-color: transparent;
+}
+
+/* - Backdrop - */
+.backdrop {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    opacity: 0.6;
+    background: black;
+    visibility: visible;
+    transition: all 0.3s ease-in;
+}
+.backdrop.backdrop-hidden {
+    visibility: hidden;
+    opacity: 0;
+}
+
+/* - Toast - */
+.toast-info {
+    width: 22px;
+    height: 22px;
+    margin-right: 7px;
+    margin-bottom: 2px;
+    background: url('~@frontend/assets/images/info.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* - Logout icon - */
+.logout-icon {
+    width: 20px;
+    height: 20px;
+    background: url('~@frontend/assets/images/logout.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* - jsTree - */
+.jstree-parent .session-icon {
+    width: 22px !important;
+    height: 22px !important;
+    background: url('~@frontend/assets/images/book.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.jstree-parent .dir-icon {
+    width: 21px !important;
+    height: 21px !important;
+    background: url('~@frontend/assets/images/folder.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.jstree-parent .trash-icon {
+    width: 24px !important;
+    height: 23px !important;
+    background: url('~@frontend/assets/images/trash.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* - Tippy - */
+* {
+    --tippy-background: rgb(17, 17, 17);
+}
+.tippy-box,
+.tippy-backdrop,
+.tippy-arrow {
+    background-color: var(--tippy-background);
+}
+.tippy-box[data-placement^='top'] > .tippy-arrow::before {
+    border-top-color: var(--tippy-background);
+}
+.tippy-box[data-placement^='bottom'] > .tippy-arrow::before {
+    border-bottom-color: var(--tippy-background);
+}
+.tippy-box[data-placement^='left'] > .tippy-arrow::before {
+    border-left-color: var(--tippy-background);
+}
+.tippy-box[data-placement^='right'] > .tippy-arrow::before {
+    border-right-color: var(--tippy-background);
+}
+
+/* - RTE Toolbar - */
+.toolbar-undo {
+    background-image: url('~@frontend/assets/images/toolbar/undo.png');
+}
+.toolbar-redo {
+    background-image: url('~@frontend/assets/images/toolbar/redo.png');
+}
+.toolbar-bold {
+    background-image: url('~@frontend/assets/images/toolbar/bold.png');
+}
+.toolbar-italic {
+    background-image: url('~@frontend/assets/images/toolbar/italic.png');
+}
+.toolbar-underline {
+    background-image: url('~@frontend/assets/images/toolbar/underline.png');
+}
+.toolbar-strikeThrough {
+    background-image: url('~@frontend/assets/images/toolbar/strikethrough.png');
+}
+.toolbar-superscript {
+    background-image: url('~@frontend/assets/images/toolbar/superscript.png');
+}
+.toolbar-subscript {
+    background-image: url('~@frontend/assets/images/toolbar/subscript.png');
+}
+.toolbar-clear {
+    background-image: url('~@frontend/assets/images/toolbar/clear.png');
+}
+.toolbar-resize {
+    background-image: url('~@frontend/assets/images/toolbar/resize.png');
+}
+.toolbar-textcolor {
+    background-image: url('~@frontend/assets/images/toolbar/textcolor.png');
+}
+.toolbar-backgroundcolor {
+    background-image: url('~@frontend/assets/images/toolbar/backgroundcolor.png');
+}
+
+/* - Media buttons - */
+.media-btn {
+    width: 30px;
+    height: 30px;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 24px 24px;
+}
+.media-image {
+    background-image: url('~@frontend/assets/images/picture.png');
+}
+.media-audio {
+    background-image: url('~@frontend/assets/images/audio.png');
+}
+
+/* - Bootstrap and other UI modifications - */
+.btn {
+    border-radius: 0;
+}
