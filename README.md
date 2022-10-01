@@ -122,7 +122,9 @@ For a more visual explanation, it's a good idea to watch the video tutorial on Y
 
 - All the data of the Langbook program is stored in your machine, in a folder named *langbook-data*, which is created by the program automatically if it doesn't exist already.
 - On Linux systems, this folder is placed inside your user's home directory.
-- On Windows, this folder is usually placed in `C:\Users\<your_username_here>\AppData\Local\Programs\langbook` , where *<your_username_here>* must be replaced with your username in Windows.
+- On Windows, this folder is usually placed in
+  `C:\Users\<your_username_here>\AppData\Local\Programs\langbook` 
+  where *<your_username_here>* must be replaced with your username in Windows.
 - Since all information is inside this folder, **I strongly advise you to regularly make a backup of this folder** and keep it in a safe place (such as a cloud service or a separate hard drive or USB drive).
 - In case you accidentally lose the data from your *langbook-data* folder in your computer, you can restore it from a copy of this folder by just placing it in the same location where the original folder was, and the program will work normally.
 
