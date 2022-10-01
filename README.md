@@ -128,9 +128,15 @@ For a more visual explanation, it's a good idea to watch the video tutorial on Y
 
 #### Useful commands:
 
-- W
+- Main window: Double-clicking the area that contains the sessions' tree will toggle select/deselect all sessions and folders in the tree.
 
-  
+- Main window: Double-clicking a filtered card in the cards view will open the edit window for this card.
+
+- Editor window: When editing a card, if you click an image that was dropped inside of the *front*, *back* or *extra* fields of the card, the image will get a blue outline that indicates it's now resizable. You can resize an image this way by using your mouse scroll. Notice that pressing <kbd>CTRL</kbd> while resizing increases resize precision.
+
+- Flashcards window: You can grab and move the flashcards area with the left mouse button. You can also apply zoom to some point on the flashcards area by using your mouse scroll, and pressing the <kbd>CTRL</kbd> key while scrolling increases zoom precision. If you press the right mouse button, the original zoom and position of the flashcards area will be restored.
+
+   
 
 ---
 
