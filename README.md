@@ -18,10 +18,10 @@ Currently there are pre-built installers for Windows and Linux systems.
 Just download the appropriate file for your system and install it.
 The most recent version of this program is **1.0.1**, released on **October 01, 2022**.
 
-- Windows: [Download here](https://github.com/jpgmoreira/langbook/releases/download/v1.0.0/Langbook.Setup.1.0.0.exe).
-- Linux *.deb* file (for Ubuntu, Mint, and other Debian-based distros): [Download here](https://github.com/jpgmoreira/langbook/releases/download/v1.0.0/langbook_1.0.0_amd64.deb).
+- Windows: [Download here](https://github.com/jpgmoreira/langbook/releases/download/v1.0.1/Langbook.Setup.1.0.1.exe).
+- Linux *.deb* file (for Ubuntu, Mint, and other Debian-based distros): [Download here](https://github.com/jpgmoreira/langbook/releases/download/v1.0.1/langbook_1.0.1_amd64.deb).
 
-- Linux *.rpm* file (if your distro uses rpm, like Fedora or CentOS): [Download here](https://github.com/jpgmoreira/langbook/releases/download/v1.0.0/langbook-1.0.0.x86_64.rpm).
+- Linux *.rpm* file (if your distro uses rpm, like Fedora or CentOS): [Download here](https://github.com/jpgmoreira/langbook/releases/download/v1.0.1/langbook-1.0.1.x86_64.rpm).
 
   
 
