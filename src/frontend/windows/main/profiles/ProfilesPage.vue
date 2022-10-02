@@ -98,7 +98,7 @@
                     <div class="fine-print">A notebook application for studying languages and other subjects.</div>
                 </div>
                 <ul class="m-0 mt-5">
-                    <li>Version: 1.0.0 (September 2022)</li>
+                    <li>Version: 1.0.1 (October 01, 2022)</li>
                     <li>Homepage: <a href="autolinker:https://github.com/jpgmoreira/langbook">https://github.com/jpgmoreira/langbook</a></li>
                 </ul>
                 <textarea class="clipboard" ref="about-clipboard" @blur="$event.target.focus()"></textarea>

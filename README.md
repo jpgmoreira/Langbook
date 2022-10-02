@@ -16,7 +16,7 @@ If you find any bugs, problems, problems during the installation, or have any su
 
 Currently there are pre-built installers for Windows and Linux systems.
 Just download the appropriate file for your system and install it.
-The most recent version of this program is **1.0.0**, released on **September 30, 2022**.
+The most recent version of this program is **1.0.1**, released on **October 01, 2022**.
 
 - Windows: [Download here](https://github.com/jpgmoreira/langbook/releases/download/v1.0.0/Langbook.Setup.1.0.0.exe).
 - Linux *.deb* file (for Ubuntu, Mint, and other Debian-based distros): [Download here](https://github.com/jpgmoreira/langbook/releases/download/v1.0.0/langbook_1.0.0_amd64.deb).

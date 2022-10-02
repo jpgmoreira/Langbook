@@ -1,6 +1,6 @@
 {
     "name": "langbook",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "private": true,
     "author": "João Moreira <jpgmoreira19@gmail.com>",
     "description": "A notebook application for studying languages and other subjects.",
