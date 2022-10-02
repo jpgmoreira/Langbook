@@ -3,7 +3,7 @@
         <div class="fs-5 text-center mt-2">Select or create a profile</div>
         <div class="table-container flex-fill position-relative mx-1">
             <div class="position-absolute overflow-auto w-100 top-0 bottom-0">
-                <table v-if="allProfiles.length" class="w-100 table-sm table-bordered">
+                <table v-if="hasProfile" class="w-100 table-sm table-bordered">
                     <thead>
                         <tr>
                             <th>Profile</th>
@@ -143,6 +143,11 @@
                 activeProfile: {},
                 lastOperation: 0, // Avoid multiple clicks on buttons.
             };
+        },
+        computed: {
+            hasProfile() {
+                return this.allProfiles && this.allProfiles.some((p) => !p.deleted);
+            },
         },
         methods: {
             showToast() {
