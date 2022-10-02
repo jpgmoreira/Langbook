@@ -2,7 +2,7 @@
 
 A notebook application for helping in the study of languages and other subjects.
 
-**Video tutorial:** *Coming soon.*
+**Video tutorial:** *https://www.youtube.com/watch?v=_Gg38QiTq5M*
 
 This program is free and open source. Feel free to fork this repo and develop your own customized version of this program, or develop new features, etc. If you develop some new cool functionality, it would be nice to let me know.
 
