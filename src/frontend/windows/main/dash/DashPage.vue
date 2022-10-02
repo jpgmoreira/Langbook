@@ -10,7 +10,6 @@
         @click="contextMenuEvent = null"
         @mousedown="mouseDown"
         @dragstart.prevent
-        @keydown.tab.prevent
         @keyup.enter="filterCards"
     >
         <div class="sessions-column" ref="sessions-column" @dragstart.prevent>
@@ -25,7 +24,7 @@
             <CardsView ref="cards-view" v-if="cards.length" :cards="cards" @card-edit="openEditCard"/>
             <div v-else class="gray-info-message d-flex flex-fill align-items-center justify-content-center user-select-none">No card satisfy the filters</div>
             <div class="dash-footer mt-auto">
-                <div class="control-menu px-1 py-1 pb-2" :style="controlMenuStyle">
+                <div class="control-menu px-1 py-1 pb-2" :style="controlMenuStyle" :class="{ visible: menuVisible }">
                     <div class="fs-5">Filters:</div>
                     <MultiSelect class="tags-multisel" :options="tags" :items="filters.tags" placeholder="Tags" ref="filters-tags" @change="modifiedFilters = true" />
                     <input type="text" spellcheck="false" class="form-control mt-1 mb-2" placeholder="Text" ref="filters-text" @input="modifiedFilters = true">
@@ -104,7 +103,7 @@
         <div class="backdrop" :class="{ 'backdrop-hidden': !backdropVisible }"></div>
         <ContextMenu :event="contextMenuEvent" @card-edit="openEditCard" @card-delete="deleteCard" />
         <toast :visible="toast.visible"> {{ toast.message }} </toast>
-        <textarea class="clipboard" ref="clipboard" @blur="clipboardBlur"></textarea>
+        <textarea class="clipboard" ref="clipboard"></textarea>
     </div>
 </template>
 
@@ -137,7 +136,6 @@
         mounted() {
             document.title = `${this.profileName}@Langbook`;
             this.$refs['filters-text'].value = this.filters.text;
-            this.$refs['clipboard'].focus();
             if (this.cards.length) {
                 this.$refs['cards-view'].scrollToBottom();
             }
@@ -281,11 +279,6 @@
                 document.documentElement.classList.add(newTheme);
                 window.api.send('change-theme', newTheme);
             },
-            clipboardBlur() {
-                if (!this.menuVisible) {
-                    this.$refs['clipboard'].focus();
-                }
-            },
         },
         watch: {
             settings: {
@@ -293,9 +286,6 @@
                 handler(newVal) {
                     window.api.send('update-settings', JSON.stringify(newVal));
                 },
-            },
-            menuVisible() {
-                this.$refs['clipboard'].focus();
             },
         },
     };
@@ -307,6 +297,17 @@
         transition-property: height, padding, margin;
         z-index: 1;
     }
+    /* to avoid the bug of focusing the tags multiselect when pressing tab while the control menu is not visible: */
+    .control-menu * {
+        transition: all 0.25s ease-out;
+    }
+    .control-menu.visible * {
+        visibility: visible;
+    }
+    .control-menu:not(.visible) * {
+        visibility: hidden;
+    }
+    /* - */
     .dash-buttons {
         position: relative;
         background-color: inherit;
