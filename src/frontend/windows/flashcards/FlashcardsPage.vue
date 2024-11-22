@@ -1,14 +1,13 @@
 <template>
-    <div class="flashcards-page d-flex flex-column" @keydown.right="goNext()" @keydown.left="goPrev()">
-        <div v-if="!currCard" class="no-cards flex-fill d-flex align-items-center justify-content-center user-select-none">There are no cards to show</div>
-        <div v-else class="flex-fill overflow-hidden cursor-grabbing" @mousemove="mousemove" @wheel="wheel" @click.right="resetView">
-            <div :style="flashcardStyle" class="flashcards-area position-relative d-flex flex-column user-select-none px-3" @dragstart.prevent>
+    <div class="flashcards-page d-flex flex-column user-select-none">
+        <div v-if="!currCard" class="no-cards d-flex flex-fill align-items-center justify-content-center">No cards left!</div>
+        <div v-else class="flex-fill position-relative overflow-hidden cursor-grabbing" @wheel="wheel" @mousemove="mousemove" @click.right="resetView">
+            <div class="flashcards-area position-absolute w-100" :style="cardAreaStyle">
                 <div class="flashcards-field" :class="{ review: currCard.review, suspended: currCard.suspended }" v-html="currFront"></div>
-                <template v-if="isHolding || !onlyFront">
-                    <!-- When holding the mouse button on the "Next" or "Previous" buttons, we always show all fields of the card, to avoid too much blinking on the screen. -->
-                    <div v-if="currBack.trim()" class="flashcards-field flashcards-sep" v-html="currBack"></div>
-                    <div v-if="currCard.extra.trim()" class="flashcards-field flashcards-sep" v-html="currCard.extra"></div>
-                    <div v-if="currCard.media.length" class="flashcards-media flashcards-sep d-flex align-items-center justify-content-center">
+                <template v-if="!onlyFront">
+                    <div v-if="currBack" class="flashcards-field flashcards-sep" v-html="currBack"></div>
+                    <div v-if="currCard.extra" class="flashcards-field flashcards-sep" v-html="currCard.extra"></div>
+                    <div v-if="currCard.media.length" class="flashcards-sep d-flex align-items-center justify-content-center py-4">
                         <div v-for="media in currCard.media" :key="media.name">
                             <tippy hideOnClick="false">
                                 <template #content>{{ media.name }}</template>
@@ -23,47 +22,58 @@
                     </div>
                     <div class="d-flex align-items-center justify-content-center">
                         <div v-for="session in currCard.sessions" :key="session">
-                            <div class="flashcards-session-badge">{{ sessions[session].name }}</div>
+                            <div class="flashcards-session-badge">
+                                {{ sessions[session].name }}
+                            </div>
                         </div>
                     </div>
                 </template>
             </div>
         </div>
-        <div class="flashcards-footer position-relative mt-auto d-flex align-items-center justify-content-center py-1">
-            <div class="cards-info user-select-none" v-if="currCard">
-                <span v-if="!currCard.removed"> Card {{ currCard.number }} of {{ cards.length }}</span>
-                <span v-else>Card do not satisfy filters anymore</span>
+        <div class="flashcards-footer position-relative d-flex align-items-center py-1 justify-content-center">
+            <div class="cards-info" v-if="currCard">
+                <span v-if="!currCard.removed">Seen {{ cardsSeen }} of {{ activeCount }} cards</span>
+                <span v-else>This card does not satisfy the filters anymore</span>
                 <span class="mx-1">&ndash;</span>
                 <span class="info-review">Review: {{ reviewCount }}</span>
                 <span class="mx-1">&ndash;</span>
                 <span class="info-suspended">Suspended: {{ suspendedCount }}</span>
             </div>
-            <button type="button" class="btn btn-primary me-4" @mousedown="holdPrev(startHoldDelay)" @mouseup="clearTimer(goPrevTimer)" @mouseleave="clearTimer(goPrevTimer)" :disabled="prevBtnDisabled">Previous</button>
-            <button type="button" class="btn btn-primary me-4" @mousedown="holdNext(startHoldDelay)" @mouseup="clearTimer(goNextTimer)" @mouseleave="clearTimer(goNextTimer)" :disabled="!currCard">Next</button>
-            <div class="d-flex align-items-center justify-content-center position-relative">
-                <tippy :hideOnClick="false" class="position-absolute top-0 bottom-0 w-100" v-if="currCard && cardActionsDisabled"><template #content>Cannot modify cards that do not satisfy the filters used anymore.</template></tippy>
-                <button type="button" class="btn btn-primary me-4" @click="openEditCard" :disabled="backdropVisible || cardActionsDisabled">Edit</button>
-                <div class="d-inline-flex me-4">
-                    <input type="checkbox" id="review-checkbox" class="form-check-input me-1" :disabled="cardActionsDisabled" :checked="currCard ? currCard.review : false" @change="toggleReview" />
-                    <label for="review-checkbox" class="user-select-none">Review</label>
+            <div class="d-flex align-items-center me-4">
+                Difficulty:
+                <div v-if="currCard && !onlyFront">
+                    <select class="form-select form-select-sm ms-1 difficulty-select" :value="currCard.difficulty" @change="changeCardDifficulty">
+                        <option :value="n" v-for="n in 10" :key="n">{{ n }}</option>
+                    </select>
                 </div>
-                <div class="d-inline-flex">
-                    <input type="checkbox" id="suspended-checkbox" class="form-check-input me-1" :disabled="cardActionsDisabled" :checked="currCard ? currCard.suspended : false" @change="toggleSuspended" />
-                    <label for="suspended-checkbox" class="user-select-none">Suspended</label>
+                <div v-else>
+                    <select class="form-select form-select-sm ms-1 difficulty-select" disabled>
+                        <option>&#8212;</option>
+                    </select>
                 </div>
+            </div>
+            <button class="btn btn-primary me-4" @click="goPrev" :disabled="prevBtnDisabled">Previous</button>
+            <button class="btn btn-primary me-4" @click="goNext" :disabled="!currCard">Next</button>
+            <button class="btn btn-primary me-4" @click="openEditCard" :disabled="!currCard">Edit</button>
+            <div class="me-4">
+                <input type="checkbox" id="review-checkbox" class="form-check-input me-1" :checked="currCard ? currCard.review : false" :disabled="checkboxesDisabled" @change="toggleReview" />
+                <label for="review-checkbox">Review</label>
+            </div>
+            <div>
+                <input type="checkbox" id="suspended-checkbox" class="form-check-input me-1" :checked="currCard ? currCard.suspended : false" :disabled="checkboxesDisabled" @change="toggleSuspended" />
+                <label for="suspended-checkbox">Suspended</label>
             </div>
         </div>
         <div class="backdrop" :class="{ 'backdrop-hidden': !backdropVisible }"></div>
         <MediaModal :path="mediaPath" :visible="mediaVisible" @close="mediaVisible = false" />
         <toast :visible="toast.visible"> {{ toast.message }} </toast>
-        <textarea class="clipboard" ref="clipboard" @blur="$event.target.focus()"></textarea>
     </div>
 </template>
 
 <script>
     import mediaMixin from '@frontend/mixins/mediaMixin';
-    import Toast from '@frontend/components/Toast.vue';
     import MediaModal from '@frontend/components/modals/MediaModal.vue';
+    import Toast from '@frontend/components/Toast.vue';
     export default {
         mixins: [mediaMixin],
         components: {
@@ -76,42 +86,31 @@
             reviewProbProp: String,
             suspendedProbProp: String,
         },
-        mounted() {
-            this.$refs['clipboard'].focus();
-        },
         data() {
             return {
                 backdropVisible: false,
 
-                // - Media modal:
-                mediaVisible: false,
-                mediaPath: '',
-
-                // - Cards, card selection and navigation:
+                // - Cards and navigation:
                 cards: this.cardsProp, // Array of cards.
                 history: [], // Array of cards.
-                reversed: [], // Array of boolean. Tells if history[i] is reversed.
-                reviewProb: 0.3,
-                suspendedProb: 0.1,
-                reverseProb: 0.5,
-                reviewCount: 0,
-                suspendedCount: 0,
+                reversed: [], // Array of boolean.
+                historyIndex: -1, // Points to this.history.
+                cardsIndex: -1, // Points to this.cards.
                 reviewIndex: -1, // Points to this.cards.
-                normalIndex: -1, // Points to this.cards.
-                historyIndex: 0, // Points to this.history.
-                onlyFront: true, // If currently showing only the front of the card.
+                reviewCount: 0, // # of non-removed cards marked as review.
+                suspendedCount: 0, // # of non-removed cards marked as suspended.
+                removedCount: 0, // # of edited cards that don't satisfy the filters anymore.
+                reviewProb: 0.3, // Default value.
+                suspendedProb: 0.1, // Default value.
+                onlyFront: true,
 
-                // - Automatic navigation on mouse button hold ("next" & "previous" buttons):
-                goPrevTimer: null,
-                goNextTimer: null,
-                holdDelay: 80, // Time between calls of goPrev and goNext when holding.
-                startHoldDelay: 500, // Time to determine if the user is holding the mouse button or not.
-                isHolding: false,
+                // - Auxiliary to compute the number of different non-removed cards seen in the current pass:
+                isPassStart: [], // Array of boolean. Indicates if history[i] is the start of a new pass in the cards.
 
-                // - Flashcard zooming and moving:
+                // - Flashcard zoom and translation:
                 scale: 1.0,
-                top: 70, // relative offset.
-                left: 0, // relative offset.
+                top: 70,
+                left: 0,
 
                 // - Toast:
                 toast: {
@@ -122,6 +121,7 @@
         },
         created() {
             document.title = 'Flashcards';
+            document.addEventListener('keydown', this.keydown);
             window.api.on('hide-backdrop', () => {
                 this.backdropVisible = false;
             });
@@ -129,39 +129,31 @@
                 const { card, satisfyFilters } = JSON.parse(data);
                 const oldCard = this.cards.find((c) => c._id === card._id);
                 if (satisfyFilters) {
-                    Object.assign(oldCard, card);
-                    return;
-                }
-                // When a card is edited and does not satisfy the filters anymore, I do not remove it from the history.
-                oldCard.removed = true;
-                if (oldCard.review) this.reviewCount--;
-                if (oldCard.suspended) this.suspendedCount--;
-                this.cards = this.cards.filter((c) => c._id !== card._id);
-                this.computeCardNumbers();
-                if (this.cards.length) {
-                    this.reviewIndex = this.reviewIndex % this.cards.length;
-                    this.normalIndex = this.normalIndex % this.cards.length;
+                    if (oldCard.removed) {
+                        oldCard.removed = false;
+                        this.removedCount--;
+                        if (oldCard.review) this.reviewCount++;
+                        if (oldCard.suspended) this.suspendedCount++;
+                    }
                 } else {
-                    this.reviewIndex = 0;
-                    this.normalIndex = 0;
+                    if (!oldCard.removed) {
+                        oldCard.removed = true;
+                        this.removedCount++;
+                        if (oldCard.review) this.reviewCount--;
+                        if (oldCard.suspended) this.suspendedCount--;
+                    }
                 }
+                Object.assign(oldCard, card);
             });
-            if (!this.cards.length) return;
             const rp = parseFloat(this.reviewProbProp) / 100;
             const sp = parseFloat(this.suspendedProbProp) / 100;
-            const rpNaN = Number.isNaN(rp);
-            const spNaN = Number.isNaN(sp);
-            if (!rpNaN && !spNaN) {
+            if (Number.isNaN(rp) || Number.isNaN(sp)) {
+                this.toast.message = 'Invalid review or suspended probabilities in the settings!';
+                this.toast.visible = true;
+            } else {
                 this.reviewProb = rp;
                 this.suspendedProb = sp;
-            } else {
-                this.toast.visible = true;
-                if (rpNaN && spNaN) this.toast.message = 'There is a problem with the review and suspended probabilities in the settings. Please review them.';
-                if (rpNaN && !spNaN) this.toast.message = 'There is a problem with the review probability in the settings. Please review it.';
-                if (!rpNaN && spNaN) this.toast.message = 'There is a problem with the suspended probability in the settings. Please review it.';
             }
-            this.shuffle(this.cards);
-            this.computeCardNumbers();
             this.chooseNextCard();
         },
         computed: {
@@ -170,86 +162,82 @@
             },
             currFront() {
                 if (!this.currCard) return '';
-                if (this.reversed[this.historyIndex]) return this.currCard.back;
-                return this.currCard.front;
+                return this.reversed[this.historyIndex] ? this.currCard.back : this.currCard.front;
             },
             currBack() {
                 if (!this.currCard) return '';
-                if (this.reversed[this.historyIndex]) return this.currCard.front;
-                return this.currCard.back;
+                return this.reversed[this.historyIndex] ? this.currCard.front : this.currCard.back;
             },
-            prevBtnDisabled() {
-                return this.onlyFront && this.historyIndex === 0;
+            activeCount() {
+                return this.cards.length - this.removedCount;
             },
-            cardActionsDisabled() {
-                return !this.currCard || this.currCard.removed;
+            cardsSeen() {
+                const idSet = new Set();
+                let i = this.historyIndex;
+                for (; i > 0 && !this.isPassStart[i]; i--) {
+                    if (!this.history[i].removed) {
+                        idSet.add(this.history[i]._id);
+                    }
+                }
+                if (this.isPassStart[i] && !this.history[i].removed) {
+                    idSet.add(this.history[i]._id);
+                }
+                return idSet.size;
             },
-            flashcardStyle() {
+            cardAreaStyle() {
                 return {
                     transform: `scale(${this.scale})`,
                     top: `${this.top}px`,
                     left: `${this.left}px`,
                 };
             },
+            prevBtnDisabled() {
+                return this.onlyFront && this.historyIndex === 0;
+            },
+            checkboxesDisabled() {
+                return !this.currCard || this.currCard.removed;
+            },
         },
         methods: {
-            goPrev() {
-                if (this.isHolding || this.onlyFront) {
-                    if (this.historyIndex === 0) return;
-                    this.historyIndex--;
-                }
-                if (this.isHolding) {
-                    if (this.historyIndex === 0) this.onlyFront = true;
-                } else this.onlyFront = !this.onlyFront;
-            },
             goNext() {
-                if (this.isHolding || !this.onlyFront) {
+                if (!this.currCard) return;
+                if (!this.onlyFront) {
                     this.historyIndex++;
-                    if (this.historyIndex >= this.history.length) this.chooseNextCard();
+                    if (this.historyIndex === this.history.length) {
+                        this.chooseNextCard();
+                    }
                 }
-                if (!this.currCard) this.onlyFront = true;
-                else if (!this.isHolding) this.onlyFront = !this.onlyFront;
+                this.onlyFront = !this.onlyFront;
             },
-            holdPrev(delay) {
-                this.goPrev();
-                this.goPrevTimer = setTimeout(() => {
-                    this.isHolding = true;
-                    this.holdPrev(this.holdDelay);
-                }, delay);
-            },
-            holdNext(delay) {
-                this.goNext();
-                this.goNextTimer = setTimeout(() => {
-                    this.isHolding = true;
-                    this.holdNext(this.holdDelay);
-                }, delay);
-            },
-            clearTimer(timer) {
-                this.isHolding = false;
-                clearTimeout(timer);
+            goPrev() {
+                if (this.onlyFront) this.historyIndex--;
+                this.onlyFront = !this.onlyFront;
             },
             chooseNextCard() {
-                if (!this.cards.length) return;
-                if (this.reviewCount && Math.random() < this.reviewProb) {
-                    while (true) {
-                        this.reviewIndex = (this.reviewIndex + 1) % this.cards.length;
-                        if (this.cards[this.reviewIndex].review) break;
-                    }
-                    const card = this.cards[this.reviewIndex];
-                    this.history.push(card);
-                    this.historyIndex = this.history.length - 1;
-                    this.reversed.push(card.allowReversed && Math.random() < this.reverseProb);
-                    return;
-                }
+                if (this.removedCount === this.cards.length) return;
                 let card = null;
-                for (let i = 0; i < this.cards.length; i++) {
-                    this.normalIndex = (this.normalIndex + 1) % this.cards.length;
-                    card = this.cards[this.normalIndex];
-                    if (!card.suspended || this.suspendedCount === this.cards.length || Math.random() < this.suspendedProb) break;
+                let newPass = false;
+                if (this.reviewCount && Math.random() < this.reviewProb) {
+                    // - Choose a card marked as review.
+                    do {
+                        this.reviewIndex = (this.reviewIndex + 1) % this.cards.length;
+                        card = this.cards[this.reviewIndex];
+                    } while (card.removed || !card.review);
+                } else {
+                    const showSuspended = Math.random() < this.suspendedProb;
+                    do {
+                        this.cardsIndex = (this.cardsIndex + 1) % this.cards.length;
+                        if (this.cardsIndex === 0) {
+                            this.shuffle(this.cards);
+                            newPass = true;
+                        }
+                        card = this.cards[this.cardsIndex];
+                    } while (card.removed || (this.suspendedCount < this.activeCount && card.suspended && !showSuspended));
                 }
+                this.isPassStart.push(newPass);
+                this.reversed.push(card.allowReversed && Math.random() < 0.5);
                 this.history.push(card);
                 this.historyIndex = this.history.length - 1;
-                this.reversed.push(card.allowReversed && Math.random() < this.reverseProb);
             },
             toggleReview() {
                 if (this.currCard.suspended) this.suspendedCount--;
@@ -265,7 +253,27 @@
             },
             openEditCard() {
                 this.backdropVisible = true;
-                window.api.send('open-edit-card', { cardId: this.currCard._id, parent: 'flashcards' });
+                window.api.send('open-edit-card', {
+                    cardId: this.currCard._id,
+                    parent: 'flashcards',
+                });
+            },
+            changeCardDifficulty(e) {
+                // This enumeration of properties is necessary because "this.currCard" contains
+                // properties that must not be sent to the "update-card" endpoint.
+                const card = {
+                    _id: this.currCard._id,
+                    front: this.currCard.front,
+                    back: this.currCard.back,
+                    extra: this.currCard.extra,
+                    difficulty: parseInt(e.target.value),
+                    allowReversed: this.currCard.allowReversed,
+                    createdAt: this.currCard.createdAt,
+                    sessions: this.currCard.sessions,
+                    tags: this.currCard.tags,
+                    media: this.currCard.media,
+                };
+                window.api.send('update-card', JSON.stringify(card));
             },
             shuffle(arr) {
                 // [https://stackoverflow.com/a/2450976/7974053]
@@ -278,9 +286,20 @@
                 }
                 return arr;
             },
-            computeCardNumbers() {
-                for (let i = 0; i < this.cards.length; i++) {
-                    this.cards[i].number = i + 1;
+            keydown(e) {
+                if (e.key === 'ArrowRight') this.goNext();
+                else if (e.key === 'ArrowLeft' && !this.prevBtnDisabled) this.goPrev();
+                else if (e.key === 'Escape') this.resetView();
+            },
+            resetView() {
+                this.scale = 1.0;
+                this.top = 70;
+                this.left = 0;
+            },
+            mousemove(e) {
+                if (e.buttons === 1) {
+                    this.top += e.movementY;
+                    this.left += e.movementX;
                 }
             },
             wheel(e) {
@@ -291,7 +310,7 @@
                 let val = this.scale / factor;
                 if (e.deltaY > 0) val *= -1;
                 this.scale = Math.max(this.scale + val, 0.1);
-                // 2. Center on zoomed point:
+                // 2. Center at zoomed point:
                 const c = { x: e.clientX, y: e.clientY };
                 const vec = { x: c.x - this.left, y: c.y - this.top };
                 vec.x *= this.scale / prevScale;
@@ -299,25 +318,6 @@
                 const c2 = { x: this.left + vec.x, y: this.top + vec.y };
                 this.left += c.x - c2.x;
                 this.top += c.y - c2.y;
-            },
-            mousemove(e) {
-                if (e.buttons === 1) {
-                    this.top += e.movementY;
-                    this.left += e.movementX;
-                }
-            },
-            resetView() {
-                this.top = 70;
-                this.left = 0;
-                this.scale = 1.0;
-            },
-        },
-        watch: {
-            prevBtnDisabled(newVal) {
-                if (newVal) this.clearTimer(this.goPrevTimer);
-            },
-            currCard(newVal) {
-                if (!newVal) this.clearTimer(this.goNextTimer);
             },
         },
     };
@@ -357,12 +357,14 @@
 </style>
 
 <style scoped>
-    .no-cards {
-        font-size: 2rem;
-        opacity: 0.6;
-    }
     .flashcards-page {
         height: 100vh;
+    }
+    .flashcards-footer {
+        border-top: 1px solid;
+    }
+    .flashcards-area {
+        transform-origin: 0px 0px;
     }
     .flashcards-field {
         font-size: var(--font-size);
@@ -370,21 +372,12 @@
         text-align: center;
         padding: 20px 0;
     }
-    .flashcards-media {
-        padding: 15px 0;
-    }
     .flashcards-session-badge,
     .flashcards-tag-badge {
         padding: 0 8px;
         margin: 0 2px;
         border-radius: 11px;
         font-size: 0.89rem;
-    }
-    .flashcards-area {
-        transform-origin: 0px 0px;
-    }
-    .flashcards-footer {
-        border-top: 1px solid;
     }
     .cards-info {
         position: absolute;
@@ -394,5 +387,12 @@
         border-left: 1px solid;
         font-size: 0.875rem;
         padding: 3px 5px;
+    }
+    .difficulty-select {
+        width: 65px;
+    }
+    .no-cards {
+        font-size: 2rem;
+        opacity: 0.6;
     }
 </style>

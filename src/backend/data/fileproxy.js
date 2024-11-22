@@ -3,6 +3,7 @@ const diskFlushDelay = 500;
 const diskFlushTimer = {}; // Maps filenames to timers.
 const proxies = {}; // Maps strings (proxy names) to proxy objects.
 const savedCount = {}; // Maps filenames to the number of times the file was saved.
+const util = require('util');
 
 const fileProxy = (fileName, proxyName, targetObj) => {
     /**
@@ -21,7 +22,7 @@ const fileProxy = (fileName, proxyName, targetObj) => {
                 // Strategy to get the target underlying object of a Proxy: Access the Proxy's _target property.
                 return obj;
             }
-            if (typeof obj[prop] === 'object' && obj[prop] !== null) {
+            if (!util.types.isProxy(obj[prop]) && typeof obj[prop] === 'object' && obj[prop] !== null) {
                 return new Proxy(obj[prop], this);
             }
             return obj[prop];
@@ -30,7 +31,7 @@ const fileProxy = (fileName, proxyName, targetObj) => {
             obj[prop] = value;
             clearTimeout(diskFlushTimer[fileName]);
             diskFlushTimer[fileName] = setTimeout(() => {
-                fs.writeFileSync(fileName, JSON.stringify(proxies[proxyName], null, 4));
+                fs.writeFileSync(fileName, JSON.stringify(targetObj, null, 4));
                 savedCount[fileName]++;
                 console.log(`-- ${fileName} saved! ${savedCount[fileName]}`);
             }, diskFlushDelay);

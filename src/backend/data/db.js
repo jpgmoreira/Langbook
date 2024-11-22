@@ -18,9 +18,10 @@ const updateCard = (card) => {
     cards.update({ _id: card._id }, card);
 };
 
-const cardSatisfyFilters = ({ card, text, tags, sessions }) => {
+const cardSatisfyFilters = ({ card, text, tags, difficulties, sessions }) => {
     // tags: selected tag names.
     // sessions: selected session ids.
+    // difficulties: array of ints with the selected difficulties.
     // 1. The card must be in at least one selected session:
     if (!sessions.some((s) => card.sessions.includes(s))) return false;
     // 2. The card must have all selected tags:
@@ -28,7 +29,9 @@ const cardSatisfyFilters = ({ card, text, tags, sessions }) => {
     //       deleted tag was explicitly chosen as a filter).
     if (!tags.every((t) => card.tags.includes(t))) return false;
     if (card.tags.includes('deleted') && !tags.includes('deleted')) return false;
-    // 3. At least one card's field must match the search text:
+    // 3. The card's difficulty must be contained in the difficulties array:
+    if (difficulties.length && !difficulties.includes(card.difficulty)) return false;
+    // 4. At least one card's field must match the search text:
     const searchText = text.trim().replace(/\s+/g, '').toLowerCase();
     if (searchText) {
         const cardFront = stripHtml(card.front).result.replace(/\s+/g, '').toLowerCase();
@@ -44,10 +47,14 @@ const cardSatisfyFilters = ({ card, text, tags, sessions }) => {
     return true;
 };
 
-const filterCards = async (text, tags, sessions) => {
+const filterCards = async (text, tags, difficulties, sessions) => {
     if (!sessions.length) return [];
     const allCards = await cards.find({});
-    return allCards.filter((card) => cardSatisfyFilters({ card, text, tags, sessions }));
+    return allCards.filter((card) => cardSatisfyFilters({ card, text, tags, difficulties, sessions }));
+};
+
+const getCardById = async (_id) => {
+    return await cards.findOne({ _id });
 };
 
 module.exports = {
@@ -56,4 +63,5 @@ module.exports = {
     updateCard,
     cardSatisfyFilters,
     filterCards,
+    getCardById,
 };

@@ -10,6 +10,14 @@
         <div>
             <MultiSelect class="mb-1 tags-multiselect" ref="tags-multiselect" :options="tagsOptions" :items="tags" :create="createTagFilter" :onItemRemove="removeTagFilter" placeholder="Tags" />
             <MultiSelect ref="sessions-multiselect" :options="allSessions" :items="sessions" placeholder="Sessions" />
+            <div class="d-flex my-1">
+                <div class="d-flex align-items-center me-1">Difficulty:</div>
+                <div class="d-flex">
+                    <div class="difficulty-filter-btn d-flex align-items-center justify-content-center" :class="{ selected: n === difficulty }" @click="difficulty = n" v-for="n in 10" :key="n">
+                        {{ n }}
+                    </div>
+                </div>
+            </div>
             <div class="d-flex align-items-center justify-content-around my-1">
                 <div>
                     <input type="checkbox" id="toggle-allow-reversed" ref="toggle-allow-reversed" class="form-check-input mx-2" :checked="allowReversed" />
@@ -42,6 +50,7 @@
             front: String,
             back: String,
             extra: String,
+            difficultyProp: Number,
             mediaProp: Array,
             allowReversed: Boolean,
             tags: Array,
@@ -57,6 +66,7 @@
             return {
                 blockButtons: false, // Avoid multiple clicks on buttons.
                 media: this.mediaProp,
+                difficulty: this.difficultyProp,
                 toast: {
                     visible: false,
                     message: '',
@@ -140,6 +150,7 @@
                     front: this.trimCardField(this.$refs['front'].getValue()),
                     back: this.trimCardField(this.$refs['back'].getValue()),
                     extra: this.trimCardField(this.$refs['extra'].getValue()),
+                    difficulty: this.difficulty,
                     allowReversed: this.$refs['toggle-allow-reversed'].checked,
                     createdAt: Date.now(),
                     sessions: this.$refs['sessions-multiselect'].getValue(),
@@ -157,6 +168,7 @@
                     front: this.trimCardField(this.$refs['front'].getValue()),
                     back: this.trimCardField(this.$refs['back'].getValue()),
                     extra: this.trimCardField(this.$refs['extra'].getValue()),
+                    difficulty: this.difficulty,
                     allowReversed: this.$refs['toggle-allow-reversed'].checked,
                     createdAt: this.createdAt,
                     sessions: this.$refs['sessions-multiselect'].getValue(),

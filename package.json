@@ -1,6 +1,6 @@
 {
     "name": "langbook",
-    "version": "1.0.2",
+    "version": "1.1.0",
     "private": true,
     "author": "João Moreira <jpgmoreira19@gmail.com>",
     "description": "A notebook application for studying languages and other subjects.",
@@ -14,22 +14,22 @@
         "postuninstall": "electron-builder install-app-deps"
     },
     "dependencies": {
-        "autolinker": "^3.15.0",
-        "axios": "^0.27.2",
-        "cheerio": "^1.0.0-rc.10",
-        "jquery": "^3.6.0",
-        "nanoid": "^3.3.3",
-        "nedb-promises": "^6.0.3",
-        "open": "^8.4.0",
-        "string-strip-html": "^8.3.0",
-        "vue": "^3.0.0",
-        "vue-tippy": "^6.0.0-alpha.58"
+        "autolinker": "3.15.0",
+        "axios": "0.27.2",
+        "cheerio": "1.0.0-rc.10",
+        "jquery": "3.6.0",
+        "nanoid": "3.3.3",
+        "nedb-promises": "6.0.3",
+        "open": "8.4.0",
+        "string-strip-html": "8.3.0",
+        "vue": "3.0.0",
+        "vue-tippy": "6.0.0-alpha.58"
     },
     "devDependencies": {
-        "@vue/cli-service": "^5.0.8",
-        "@vue/compiler-sfc": "^3.0.0",
-        "electron": "^20.1.4",
-        "electron-devtools-installer": "^3.1.0",
-        "vue-cli-plugin-electron-builder": "^2.1.1"
+        "@vue/cli-service": "4.5.15",
+        "@vue/compiler-sfc": "3.0.0",
+        "electron": "20.1.4",
+        "electron-devtools-installer": "3.1.0",
+        "vue-cli-plugin-electron-builder": "2.1.1"
     }
 }

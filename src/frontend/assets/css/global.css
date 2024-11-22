@@ -182,3 +182,22 @@ textarea.clipboard {
 .btn {
     border-radius: 0;
 }
+
+/* - Difficulty filter button - */
+.difficulty-filter-btn {
+    width: 25px;
+    height: 25px;
+    margin-left: -1px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.15s ease-out;
+}
+.difficulty-filter-btn:first-child {
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px;
+}
+.difficulty-filter-btn:last-child {
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    width: 30px;
+}

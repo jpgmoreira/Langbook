@@ -22,6 +22,6 @@ ipcMain.handle('logout', () => {
     return data.logout();
 });
 
-ipcMain.handle('filter-cards', (_, { text, tags, nodes }) => {
-    return data.filterCards(text, tags, nodes);
+ipcMain.handle('filter-cards', (_, { text, tags, nodes, difficulties }) => {
+    return data.filterCards(text, tags, nodes, difficulties);
 });

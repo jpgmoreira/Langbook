@@ -11,7 +11,7 @@ const windows = {
     flashcards: null,
 };
 
-const createWindow = (which, options) => {
+const createWindow = async (which, options) => {
     // - Define width, height and parent:
     let width, height, parent;
     if (which === 'main' || which === 'flashcards') {
@@ -20,7 +20,7 @@ const createWindow = (which, options) => {
     }
     if (which === 'add-card' || which === 'edit-card') {
         width = 1000;
-        height = 650;
+        height = 685;
     }
     if (which === 'add-card' || which === 'flashcards') parent = windows.main;
     if (which === 'edit-card') parent = windows[options.parent];
@@ -37,7 +37,7 @@ const createWindow = (which, options) => {
             preload: path.resolve(__dirname, 'preload.js'),
         },
     });
-    const windowData = data.getWindowData(which, options);
+    const windowData = await data.getWindowData(which, options);
     win.once('ready-to-show', () => {
         win.webContents.send('set-data', JSON.stringify(windowData));
         win.show();

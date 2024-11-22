@@ -265,29 +265,41 @@
 }
 
 /* - Flashcards page - */
+.theme-dark .flashcards-footer,
+.theme-dark .cards-info {
+    border-color: #353535;
+    background-color: #252525;
+}
+.theme-dark .cards-info .info-review {
+    color: #22c55e;
+}
+.theme-dark .cards-info .info-suspended {
+    color: #ef4444;
+}
+.theme-dark .flashcards-sep {
+    border-top: 3px dashed #515255;
+}
 .theme-dark .flashcards-tag-badge {
     background-color: #046de6;
 }
 .theme-dark .flashcards-session-badge {
     background-color: #b30000;
 }
-.theme-dark .flashcards-sep {
-    border-top: 3px dashed #515255;
-}
-.theme-dark .flashcards-footer,
-.theme-dark .flashcards-footer .cards-info {
-    border-color: #353535;
-    background: #252525;
-}
-.theme-dark .flashcards-footer .info-review {
-    color: #22c55e;
-}
-.theme-dark .flashcards-footer .info-suspended {
-    color: #ef4444;
-}
 .theme-dark .flashcards-field.review {
     background-color: rgba(0, 255, 0, 0.22);
 }
 .theme-dark .flashcards-field.suspended {
-    background-color: rgb(255, 0, 0, 0.35);
+    background-color: rgba(255, 0, 0, 0.35);
+}
+
+/* - Difficulty filter button - */
+.theme-dark .difficulty-filter-btn {
+    border: 1px solid #4e4e52;
+    background-color: #303031;
+}
+.theme-dark .difficulty-filter-btn:hover {
+    background-color: #4d4d50;
+}
+.theme-dark .difficulty-filter-btn.selected {
+    background-color: #4b7cbd;
 }

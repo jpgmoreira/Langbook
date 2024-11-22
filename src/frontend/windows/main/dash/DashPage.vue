@@ -27,7 +27,22 @@
                 <div class="control-menu px-1 py-1 pb-2" :style="controlMenuStyle" :class="{ visible: menuVisible }">
                     <div class="fs-5">Filters:</div>
                     <MultiSelect class="tags-multisel" :options="tags" :items="filters.tags" placeholder="Tags" ref="filters-tags" @change="modifiedFilters = true" />
-                    <input type="text" spellcheck="false" class="form-control mt-1 mb-2" placeholder="Text" ref="filters-text" @input="modifiedFilters = true">
+                    <input type="text" spellcheck="false" class="form-control mt-1" placeholder="Text" ref="filters-text" @input="modifiedFilters = true">
+                    <!-- This element below could be refactored into a separate component. -->
+                    <div class="d-flex my-1">
+                        <div class="d-flex align-items-center me-1">Difficulty:</div>
+                        <div class="d-flex">
+                            <div
+                                class="difficulty-filter-btn d-flex align-items-center justify-content-center"
+                                :class="{ selected: filters.difficulties.includes(n) }"
+                                @click="toggleFilterDifficulty(n); modifiedFilters = true"
+                                v-for="n in 10"
+                                :key="n"
+                            >
+                                {{ n }}
+                            </div>
+                        </div>
+                    </div>
                     <hr class="m-0" />
                     <div class="fs-5">Settings:</div>
                     <ul class="mb-0">
@@ -128,7 +143,7 @@
             tree: Array,
             cardsProp: Array,
             tagsProp: Array,
-            filters: Object,
+            filtersProp: Object,
             settingsProp: Object,
             nextSessionInt: Number,
             nextDirInt: Number,
@@ -194,6 +209,7 @@
                 settings: this.settingsProp,
                 cards: this.cardsProp,
                 tags: this.tagsProp,
+                filters: this.filtersProp,
                 numSessions: this.tree.filter((n) => n.type === 'session').length,
                 numSessionsSelected: this.tree.filter((n) => n.type === 'session' && n.state.selected).length,
                 filtering: false,
@@ -208,7 +224,7 @@
             controlMenuStyle() {
                 const res = {};
                 if (this.menuVisible) {
-                    res['height'] = '285px';
+                    res['height'] = '307px';
                 } else {
                     res['height'] = '0px';
                     res['padding'] = '0px !important';
@@ -253,11 +269,17 @@
                 const text = this.$refs['filters-text'].value;
                 const tags = this.$refs['filters-tags'].getValue();
                 const nodes = treeManager.getSelected();
+                const difficulties = [...this.filters.difficulties];
                 this.filtering = true;
-                window.api.invoke('filter-cards', { text, tags, nodes }).then((cards) => {
+                window.api.invoke('filter-cards', { text, tags, nodes, difficulties }).then((cards) => {
                     this.filtering = false;
                     this.modifiedFilters = false;
                     this.cards = cards;
+                    if (this.cards.length) {
+                        setTimeout(() => {
+                            this.$refs['cards-view'].scrollToBottom();
+                        }, 0);
+                    }
                 });
             },
             showToast(message) {
@@ -278,6 +300,14 @@
                 document.documentElement.classList.remove('theme-dark', 'theme-light');
                 document.documentElement.classList.add(newTheme);
                 window.api.send('change-theme', newTheme);
+            },
+            toggleFilterDifficulty(difficulty) {
+                const index = this.filters.difficulties.indexOf(difficulty);
+                if (index !== -1) {
+                    this.filters.difficulties.splice(index, 1);
+                } else {
+                    this.filters.difficulties.push(difficulty);
+                }
             },
         },
         watch: {

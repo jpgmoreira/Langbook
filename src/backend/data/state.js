@@ -5,7 +5,7 @@ const cheerio = require('cheerio');
 const axios = require('axios');
 const { Autolinker } = require('autolinker');
 const { proxies, fileProxy } = require('./fileproxy');
-const { loadCards, cardSatisfyFilters } = require('./db');
+const { loadCards, cardSatisfyFilters, getCardById } = require('./db');
 const { customAlphabet } = require('nanoid');
 const nanoid = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', 10);
 const autolinker = new Autolinker({
@@ -54,6 +54,7 @@ const loadProfile = (code) => {
     fileProxy(`${dir}/sessions.json`, 'sessions', {});
     fileProxy(`${dir}/filters.json`, 'filters', {
         tags: [],
+        difficulties: [],
         text: '',
     });
     fileProxy(`${dir}/settings.json`, 'settings', {
@@ -121,7 +122,7 @@ const getMostRecentSession = () => {
     return res;
 };
 
-const getWindowData = (window, options) => {
+const getWindowData = async (window, options) => {
     const res = {};
     const currProfile = getCurrProfile();
     if (currProfile) res.theme = currProfile.theme;
@@ -132,7 +133,7 @@ const getWindowData = (window, options) => {
             res.tree = proxies.tree;
             res.cardsProp = proxies.cardsView;
             res.tagsProp = formatAllTags();
-            res.filters = proxies.filters;
+            res.filtersProp = proxies.filters;
             res.settingsProp = proxies.settings;
             res.nextSessionInt = proxies.info.nextSessionInt;
             res.nextDirInt = proxies.info.nextDirInt;
@@ -145,6 +146,7 @@ const getWindowData = (window, options) => {
         res.front = '';
         res.back = '';
         res.extra = '';
+        res.difficultyProp = 1;
         res.mediaProp = [];
         res.allowReversed = false;
         res.tags = [];
@@ -152,12 +154,13 @@ const getWindowData = (window, options) => {
         res.allTags = formatAllTags();
         res.allSessions = formatAllSessions();
     } else if (window === 'edit-card') {
-        const card = proxies.cardsView.find((c) => c._id === options.cardId);
+        const card = await getCardById(options.cardId);
         res._id = card._id;
         res.action = 'edit-card';
         res.front = card.front;
         res.back = card.back;
         res.extra = card.extra;
+        res.difficultyProp = card.difficulty;
         res.mediaProp = card.media;
         res.allowReversed = card.allowReversed;
         res.createdAt = card.createdAt;
@@ -174,7 +177,7 @@ const getWindowData = (window, options) => {
     return res;
 };
 
-const createProfile = (name) => {
+const createProfile = async (name) => {
     if (getProfileByName(name)) throw new Error();
     const code = nanoid();
     fs.mkdirSync(`${dataDir}/${code}`);
@@ -190,7 +193,7 @@ const createProfile = (name) => {
         lastAccess: Date.now(),
     });
     loadProfile(code);
-    return JSON.stringify(getWindowData('main'));
+    return JSON.stringify(await getWindowData('main'));
 };
 
 const renameProfile = (name, code) => {
@@ -198,10 +201,10 @@ const renameProfile = (name, code) => {
     getProfileByCode(code).name = name;
 };
 
-const selectProfile = (name) => {
+const selectProfile = async (name) => {
     proxies.profiles.currProfile = name;
     loadProfile(getProfileByName(name).code);
-    return JSON.stringify(getWindowData('main'));
+    return JSON.stringify(await getWindowData('main'));
 };
 
 const deleteProfile = (name) => {
@@ -211,9 +214,9 @@ const deleteProfile = (name) => {
     profile.name = `~DELETED_${now}_${profile.name}`;
 };
 
-const logout = () => {
+const logout = async () => {
     proxies.profiles.currProfile = null;
-    return JSON.stringify(getWindowData('main'));
+    return JSON.stringify(await getWindowData('main'));
 };
 
 const createNode = (node) => {
@@ -318,17 +321,18 @@ const addCard = (card) => {
     });
     const tags = proxies.filters.tags;
     const text = proxies.filters.text;
+    const difficulties = proxies.filters.difficulties;
     const sessions = proxies.tree.filter((n) => n.type === 'session' && n.state.selected).map((s) => s.id);
-    if (cardSatisfyFilters({ card, text, tags, sessions })) {
+    if (cardSatisfyFilters({ card, text, tags, difficulties, sessions })) {
         proxies.cardsView.push(card);
         return true;
     }
     return false;
 };
 
-const updateCard = (card) => {
+const updateCard = async (card) => {
     // Returns a boolean indicating if the card satisfy the current filters.
-    const oldCard = proxies.cardsView.find((c) => c._id === card._id);
+    const oldCard = await getCardById(card._id);
     // 1. Update tags information:
     oldCard.tags.forEach((tag) => {
         if (!card.tags.includes(tag)) {
@@ -361,22 +365,26 @@ const updateCard = (card) => {
     // 3. Update cards view:
     const tags = proxies.filters.tags;
     const text = proxies.filters.text;
+    const difficulties = proxies.filters.difficulties;
     const sessions = proxies.tree.filter((n) => n.type === 'session' && n.state.selected).map((s) => s.id);
-    const satisfyFilters = cardSatisfyFilters({ card, text, tags, sessions });
+    const satisfyFilters = cardSatisfyFilters({ card, text, tags, difficulties, sessions });
     let i = 0;
     for (; i < proxies.cardsView.length; i++) {
         if (proxies.cardsView[i]._id === card._id) break;
     }
-    proxies.cardsView.splice(i, 1);
+    if (i < proxies.cardsView.length) {
+        proxies.cardsView.splice(i, 1);
+    }
     if (satisfyFilters) {
         proxies.cardsView.push(card);
     }
     return satisfyFilters;
 };
 
-const updateFilters = (text, tags, nodes) => {
+const updateFilters = (text, tags, nodes, difficulties) => {
     proxies.filters.text = text;
     proxies.filters.tags = tags;
+    proxies.filters.difficulties = difficulties.sort((a, b) => a - b);
     const nodesSet = new Set(nodes);
     const selectedSessions = [];
     proxies.tree.forEach((node) => {

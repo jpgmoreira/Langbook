@@ -63,7 +63,7 @@
                     '#e5e7eb',
                     // default:
                     '#ededf0',  // dark theme default text color.
-                    '#101113',     // light theme default text color.
+                    '#222',     // light theme default text color.
                     '#000',
                     '#fff',
                     // primary:
